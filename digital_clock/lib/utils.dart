@@ -13,7 +13,7 @@ enum ClockTheme {
 }
 final clock = Clock();
 
-List<String> numbers = const []
+List<String> numbers = []
   ..addAll(ones)
   ..addAll(
     [
@@ -57,13 +57,13 @@ List<String> tens = const [
 ];
 
 List<String> weekdays = const [
-  'Sunday',
   'Monday',
   'Tuesday',
   'Wednesday',
   'Thursday',
   'Friday',
   'Saturday',
+  'Sunday',
 ];
 
 List<String> months = const [

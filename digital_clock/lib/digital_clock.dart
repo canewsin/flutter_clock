@@ -25,7 +25,6 @@ class DigitalClock extends StatefulWidget {
 }
 
 class _DigitalClockState extends State<DigitalClock> {
-  DateTime _dateTime = DateTime.now();
   Timer _timer;
 
   @override
@@ -53,14 +52,15 @@ class _DigitalClockState extends State<DigitalClock> {
     super.dispose();
   }
 
-  void _updateModel() {
-    setState(() {
-      // Cause the clock to rebuild when the model changes.
-    });
-  }
+  void _updateModel() => (mounted) ? setState(() {}) : null;
 
+  bool _lightYearMode = false;
   void _updateTime() {
-    _dateTime = DateTime.now();
+    var _dateTime = !_lightYearMode
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(
+            (DateTime.now().millisecondsSinceEpoch * 8000).toInt());
+    ;
     String hour =
         DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
     String minute = DateFormat('mm').format(_dateTime);
@@ -71,7 +71,8 @@ class _DigitalClockState extends State<DigitalClock> {
     clock.setmonth(_dateTime.month);
     clock.setday(_dateTime.day);
     clock.setwish(getTimeText('$hour:$minute'));
-    clock.setweekday(weekdays[_dateTime.weekday]);
+    clock.setweekday(weekdays[_dateTime.weekday - 1]);
+
     _timer = Timer(
       Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
       _updateTime,
@@ -140,65 +141,90 @@ class _DigitalClockState extends State<DigitalClock> {
   }
 
   String timeString(int hours, int min) {
-    if (min >= 0 && min < 5) {
-      return '${numbers[hours - 1]}\'O Clock';
-    } else if (min >= 5 && min < 10) {
-      return 'Five Past ${numbers[hours - 1]}';
-    } else if (min >= 10 && min < 15) {
-      return 'Ten Past ${numbers[hours - 1]}';
-    } else if (min >= 15 && min < 20) {
-      return 'Quarter Past ${numbers[hours - 1]}';
-    } else if (min >= 20 && min < 25) {
-      return 'Twenty Past ${numbers[hours - 1]}';
-    } else if (min >= 25 && min < 30) {
-      return 'Twenty Five Past ${numbers[hours - 1]}';
-    } else if (min >= 30 && min < 35) {
-      return 'Half Past ${numbers[hours - 1]}';
-    } else if (min >= 35 && min < 40) {
-      return 'Twenty Five To ${numbers[hours]}';
-    } else if (min >= 40 && min < 45) {
-      return 'Tewnty To ${numbers[hours]}';
-    } else if (min >= 45 && min < 50) {
-      return 'Quarter To ${numbers[hours]}';
-    } else if (min >= 50 && min < 55) {
-      return 'Ten To ${numbers[hours]}';
-    } else if (min >= 55) {
-      return 'Five To ${numbers[hours]}';
+    List<int> listHack = [0, 15, 30, 45];
+    if (hours == 0) hours = 12;
+    if (listHack.contains(min)) {
+      switch (min) {
+        case 0:
+          return '${numbers[hours - 1]}\'O Clock';
+          break;
+        case 15:
+          return 'Quarter Past ${numbers[hours - 1]}.';
+          break;
+        case 30:
+          return 'Half Past ${numbers[hours - 1]}.';
+          break;
+        case 45:
+          return 'Quarter To ${(hours == 12) ? numbers[0] : numbers[hours]}.';
+          break;
+        default:
+      }
+    } else if (min > 0) {
+      if (min < 45) {
+        if (min < 15)
+          return '${dectoText(min)} Past ${numbers[hours - 1]}';
+        else
+          return '${numbers[hours - 1]} ${dectoText(min)}'; //${(hours == 12) ? '' : 'Minutes'}
+      } else {
+        return '${dectoText(60 - min)} Minutes To ${(hours == 12) ? numbers[0] : numbers[hours]}';
+      }
     }
     return '';
   }
 
-  String improveWish(String wish, bool afternoon) {
-    if (wish.contains('Twelve')) {
+  String dectoText(int dec) {
+    var txt = '';
+    var localStr = dec.toString();
+    if (localStr.length < 2) localStr = '0$localStr';
+    String onesPos = localStr.substring(1);
+    String tensPos = localStr.substring(0, 1);
+    int onesInt = int.parse(onesPos);
+    int tensInt = int.parse(tensPos);
+    if (onesInt > 0) txt = ones[onesInt - 1];
+    if (dec > 0 && dec < 20) {
+      if (dec > 10 && dec < 20)
+        txt = teens[dec - 10 - 1];
+      else if (dec == 10) txt = tens[0];
+    } else {
+      if (tensPos != '0' && onesPos != '0')
+        txt = tens[tensInt - 1] + ' $txt';
+      else
+        txt = 'Twelve';
+    }
+    return txt;
+  }
+
+  String improveWish(String hours, String wish, bool afternoon) {
+    if (hours.contains('Twelve')) {
       if (!afternoon) {
-        wish = wish + 'Already, Have a Sweet Dream with your pillow';
+        wish = wish + ' Already, Have a Sweet Dream with your Pillow.';
       } else {
         wish = wish + ', Have Your Tasty Lunch.';
       }
-    } else if (wish.contains('Five') ||
-        wish.contains('Six') ||
-        wish.contains('Seven') ||
-        wish.contains('Eight') ||
-        wish.contains('Nine')) {
+    } else if (hours.contains('Five') ||
+        hours.contains('Six') ||
+        hours.contains('Seven') ||
+        hours.contains('Eight') ||
+        hours.contains('Nine')) {
       if (!afternoon) {
-        wish = wish + ', Good Morning.';
+        wish = 'Good Morning, $wish.';
       } else {
-        wish = wish + ', Good Evening.';
+        wish = 'Good Evening, $wish.';
       }
-    } else if (wish.contains('Ten')) {
+    } else if (hours.contains('Ten')) {
       if (!afternoon) {
-        wish = wish + ', Good Morning.';
+        wish = 'Good Morning, $wish.';
       } else {
-        wish = wish + ', Good Night, Have Sweet Dreams.';
+        wish = 'Good Night, $wish, Have Sweet Dreams.';
       }
-    } else if (wish.contains('One') ||
-        wish.contains('Two') ||
-        wish.contains('Three') ||
-        wish.contains('Four')) {
+    } else if (hours.contains('One') ||
+        hours.contains('Two') ||
+        hours.contains('Three') ||
+        hours.contains('Four')) {
       if (!afternoon) {
-        wish = wish + ', Good Morning.';
+        wish = 'Good Morning, $wish.';
       } else {
-        wish = wish + ', Good Afternoon.';
+        wish = 'Good Afternoon, $wish.';
       }
     }
     return wish;
@@ -207,13 +233,13 @@ class _DigitalClockState extends State<DigitalClock> {
   String getTimeText(String time) {
     int hours = int.parse(time.substring(0, time.indexOf(':')));
     bool afternoon = false;
-    if (hours < 00 && hours > 12) {
+    if (hours >= 12) {
       afternoon = true;
       hours = hours - 12;
     }
     int minutes = int.parse(time.substring(time.indexOf(':') + 1, time.length));
     String wish = "It's ${timeString(hours, minutes)}";
-    return improveWish(wish, afternoon);
+    return improveWish(dectoText(hours), wish, afternoon);
   }
 }
 
@@ -272,38 +298,46 @@ class TimeWidget extends StatelessWidget {
     List<Widget> paintedTexts = [];
     for (var i = 0; i < 4; i++) {
       paintedTexts.add(
-        Observer(builder: (context) {
-          String str = '00';
-          switch (i) {
-            case 0:
-              str = clock.hours.substring(0, 1);
-              break;
-            case 1:
-              str = clock.hours.substring(1);
-              break;
-            case 2:
-              str = clock.minutes.substring(0, 1);
-              break;
-            case 3:
-              str = clock.minutes.substring(1);
-              break;
-            default:
-          }
+        Observer(
+          builder: (context) {
+            String str = '00';
+            switch (i) {
+              case 0:
+                str = clock.hours.substring(0, 1);
+                break;
+              case 1:
+                str = clock.hours.substring(1);
+                break;
+              case 2:
+                str = clock.minutes.substring(0, 1);
+                break;
+              case 3:
+                str = clock.minutes.substring(1);
+                break;
+              default:
+            }
 
-          return Padding(
-            padding: EdgeInsets.only(
-              left: calcWidth / 16.44,
-              right: calcWidth / 8.22,
-              top: calcWidth / 10.275,
-            ),
-            child: CustomPaint(
-              painter: TextPainterC(
-                str,
-                defaultStyle,
+            return Padding(
+              padding: EdgeInsets.only(
+                left: calcWidth / 16.44,
+                right: calcWidth / 8.22,
+                top: calcWidth / 10.275,
               ),
-            ),
-          );
-        }),
+              child:
+                  // AnimatedContainer(
+                  //   duration: Duration(seconds: 2),
+                  //   curve: Curves.bounceInOut,
+                  //   child:
+                  CustomPaint(
+                painter: TextPainterC(
+                  str,
+                  defaultStyle,
+                ),
+              ),
+              // ),
+            );
+          },
+        ),
       );
     }
     paintedTexts.insert(
@@ -339,13 +373,24 @@ class TempWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(calcWidth / 34.25),
-      child: Text(
-        widget.model.temperatureString,
-        style: TextStyle(
-          fontSize: calcWidth / 29.36,
-          color: colors[ClockTheme.textTemp],
-        ),
-      ),
+      child: Observer(builder: (context) {
+        int sec = int.parse(clock.seconds);
+        String temp = '';
+        if (sec > 40) {
+          temp = 'High : ' + widget.model.highString;
+        } else if (sec > 20) {
+          temp = ' Low : ' + widget.model.lowString;
+        } else {
+          temp = 'Avg : ' + widget.model.temperatureString;
+        }
+        return Text(
+          temp,
+          style: TextStyle(
+            fontSize: calcWidth / 29.36,
+            color: colors[ClockTheme.textTemp],
+          ),
+        );
+      }),
     );
   }
 }
@@ -473,7 +518,15 @@ class TextPainterC extends CustomPainter {
         fontWeight: style.fontWeight,
         textAlign: TextAlign.justify,
       ),
-    )..addText(text);
+    )
+      ..pushStyle(ui.TextStyle(shadows: [
+        ui.Shadow(
+          blurRadius: 45,
+          color: Colors.black45, //Colors.white54.withOpacity(0.25)
+          offset: Offset(0, 5),
+        ),
+      ]))
+      ..addText(text);
 
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(
