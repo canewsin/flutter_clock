@@ -193,6 +193,9 @@ class _ClockCustomizerState extends State<ClockCustomizer> {
       darkTheme: ThemeData.dark(),
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
+      showPerformanceOverlay: true,
+      // showSemanticsDebugger: true,
+      // debugShowMaterialGrid: true,
       home: Scaffold(
         resizeToAvoidBottomPadding: false,
         endDrawer: _configDrawer(context),
