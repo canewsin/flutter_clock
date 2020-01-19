@@ -60,16 +60,23 @@ class _DigitalClockState extends State<DigitalClock> {
     String minute = DateFormat('mm').format(_dateTime);
     String second = DateFormat('ss').format(_dateTime);
     if (_speedMode) {
-      if (_dateTime.minute > 23) {
-        int i = (_dateTime.minute < 44)
-            ? (43 - _dateTime.minute)
-            : (60 - _dateTime.minute);
-        hour = '$i';
+      var data = '14:51:39';
+      if (data.isEmpty) {
+        if (_dateTime.minute > 23) {
+          int i = (_dateTime.minute < 44)
+              ? (43 - _dateTime.minute)
+              : (60 - _dateTime.minute);
+          hour = '$i';
+        } else {
+          hour = minute;
+        }
+        if (hour.length < 2) hour = '0$hour';
+        minute = second;
       } else {
-        hour = minute;
+        hour = data.split(':')[0];
+        minute = data.split(':')[1];
+        second = data.split(':')[2];
       }
-      if (hour.length < 2) hour = '0$hour';
-      minute = second;
     }
     clock.setSeconds(second);
     clock.setMinutes(minute);
