@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 CANews(An Organisation by N Bhargav). All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file in Flutter App Directory.
 
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -52,7 +52,8 @@ class _DigitalClockState extends State<DigitalClock> {
   void _updateModel() => (mounted) ? setState(() {}) : null;
 
   void _updateTime() {
-    bool _speedMode = true;
+    /// Enable this, if you want to Test Clock with Speed.
+    bool _speedMode = false;
     var _dateTime = DateTime.now();
     String hour = DateFormat(
       widget.model.is24HourFormat ? 'HH' : 'hh',
@@ -60,9 +61,13 @@ class _DigitalClockState extends State<DigitalClock> {
     String minute = DateFormat('mm').format(_dateTime);
     String second = DateFormat('ss').format(_dateTime);
     if (_speedMode) {
-      var data = '14:51:39';
+      ///'HH/hh:mm:ss'
+      ///Submit Value in the Above Format, If you want to Test A Specific Time.
+      ///Eg: 14:51:39;
+      var data = '';
       if (data.isEmpty) {
         if (_dateTime.minute > 23) {
+          ///This Helps to limit hours to be more than 23.
           int i = (_dateTime.minute < 44)
               ? (43 - _dateTime.minute)
               : (60 - _dateTime.minute);
@@ -87,7 +92,8 @@ class _DigitalClockState extends State<DigitalClock> {
     clock.setweekday(weekdays[_dateTime.weekday - 1]);
 
     _timer = Timer(
-      Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
+      const Duration(seconds: 1) -
+          Duration(milliseconds: _dateTime.millisecond),
       _updateTime,
     );
   }
@@ -110,7 +116,7 @@ class _DigitalClockState extends State<DigitalClock> {
     return Container(
       decoration: BoxDecoration(
         gradient: RadialGradient(
-          stops: [
+          stops: const [
             0.0,
             0.25,
             1.0,
@@ -142,11 +148,8 @@ class _DigitalClockState extends State<DigitalClock> {
                 SecondsTicker(
                   calcWidth: calcWidth,
                 ),
-                Observer(
-                  builder: (_) => WishWidget(
-                    wish: clock.wish,
-                    calcWidth: calcWidth,
-                  ),
+                WishWidget(
+                  calcWidth: calcWidth,
                 ),
               ],
             ),
@@ -157,7 +160,7 @@ class _DigitalClockState extends State<DigitalClock> {
   }
 
   String timeString(int hours, int min) {
-    List<int> listHack = [0, 15, 30, 45];
+    List<int> listHack = const [0, 15, 30, 45];
     if (hours == 0) hours = 12;
     if (listHack.contains(min)) {
       switch (min) {
@@ -211,36 +214,36 @@ class _DigitalClockState extends State<DigitalClock> {
   }
 
   String improveWish(String hours, String wish, bool afternoon) {
+    const String goodMorning = 'Good Morning,';
+    const String goodNight = 'Good Night,';
+    const String goodAfternoon = 'Good Afternoon,';
+    const String goodEvening = 'Good Evening,';
     if (hours.contains('Twelve')) {
       if (!afternoon) {
-        wish = wish + ' Already, Have a Sweet Dream with your Pillow.';
+        wish = wish + ' Already, Sweet Dream with your Pillow.';
       } else {
         wish = wish + ', Have Your Tasty Lunch.';
       }
-    } else if (hours.contains('Five') ||
-        hours.contains('Six') ||
-        hours.contains('Seven') ||
-        hours.contains('Eight') ||
-        hours.contains('Nine')) {
+    } else if (ones.sublist(4).contains(hours)) {
       if (!afternoon) {
-        wish = 'Good Morning, $wish.';
+        wish = '$goodMorning $wish.';
       } else {
-        wish = 'Good Evening, $wish.';
+        wish = '$goodEvening $wish.';
       }
     } else if (hours.contains('Ten')) {
       if (!afternoon) {
-        wish = 'Good Morning, $wish.';
+        wish = '$goodMorning $wish.';
       } else {
-        wish = 'Good Night, $wish, Have Sweet Dreams.';
+        wish = '$goodNight $wish, Sweet Dreams.';
       }
-    } else if (hours.contains('One') ||
-        hours.contains('Two') ||
-        hours.contains('Three') ||
-        hours.contains('Four')) {
+    } else if (ones.sublist(0, 4).contains(hours)) {
       if (!afternoon) {
-        wish = 'Good Morning, $wish.';
+        if (hours.contains('Four'))
+          wish = '$goodMorning $wish.';
+        else
+          wish = '$goodNight $wish.';
       } else {
-        wish = 'Good Afternoon, $wish.';
+        wish = '$goodAfternoon $wish.';
       }
     }
     return wish;
@@ -307,7 +310,7 @@ class TimeWidget extends StatelessWidget {
         Shadow(
           blurRadius: 0,
           color: colors[ClockTheme.shadow],
-          offset: Offset(0, 0),
+          offset: const Offset(0, 0),
         ),
       ],
     );
@@ -442,11 +445,9 @@ class WishWidget extends StatelessWidget {
   const WishWidget({
     Key key,
     @required this.calcWidth,
-    @required this.wish,
   }) : super(key: key);
 
   final double calcWidth;
-  final String wish;
 
   @override
   Widget build(BuildContext context) {
@@ -455,18 +456,20 @@ class WishWidget extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.0),
       ),
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 8.0,
         bottom: 8.0,
         left: 16.0,
         right: 16.0,
       ),
-      margin: EdgeInsets.only(bottom: 16.0),
-      child: Text(
-        wish,
-        style: TextStyle(
-          fontSize: calcWidth / 34.25,
-          color: Color(0xFF286788),
+      margin: const EdgeInsets.only(bottom: 16.0),
+      child: Observer(
+        builder: (_) => Text(
+          clock.wish,
+          style: TextStyle(
+            fontSize: calcWidth / 34.25,
+            color: const Color(0xFF286788),
+          ),
         ),
       ),
     );
@@ -532,24 +535,31 @@ class TextPainterC extends CustomPainter {
         textAlign: TextAlign.justify,
       ),
     )
-      ..pushStyle(ui.TextStyle(shadows: [
-        ui.Shadow(
-          blurRadius: 45,
-          color: Colors.black45, //Colors.white54.withOpacity(0.25)
-          offset: Offset(0, 5),
+      ..pushStyle(
+        ui.TextStyle(
+          shadows: [
+            ui.Shadow(
+              blurRadius: 45,
+              color: Colors.black45, //Colors.white54.withOpacity(0.25)
+              offset: Offset(0, 5),
+            ),
+          ],
         ),
-      ]))
+      )
       ..addText(text);
 
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(
         ui.ParagraphConstraints(width: size.width),
       );
-    canvas.drawParagraph(paragraph, const Offset(0.0, 0.0));
+    canvas.drawParagraph(
+      paragraph,
+      Offset.zero,
+    );
 
     for (var i = 0; i < 4; i++) {
       Paint paint = Paint()
-        ..style = (props(style.fontSize)[text]['binary'][i] == 0)
+        ..style = props(style.fontSize)[text]['binary'][i] == 0
             ? PaintingStyle.stroke
             : PaintingStyle.fill
         ..strokeWidth = 1.0

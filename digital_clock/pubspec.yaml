@@ -13,8 +13,6 @@ dependencies:
   cupertino_icons: ^0.1.2
   mobx: ^0.4.0
   flutter_mobx: ^0.3.4
-  flip_card:
-    path: ../../flip_card
 
 dev_dependencies:
   flutter_test:
