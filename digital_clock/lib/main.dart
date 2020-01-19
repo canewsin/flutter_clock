@@ -15,6 +15,8 @@ void main() {
   // A temporary measure until Platform supports web and TargetPlatform supports
   // macOS.
   //TODO ? Add OpenSource License for Submission.
+  //TODO ? Chage path of flip_card package to git.
+  //TODO ? Remember to remove speed mode on submit.
   //TODO ? Make Animation on Time Change.
   if (!kIsWeb && Platform.isMacOS) {
     // TODO(gspencergoog): Update this when TargetPlatform includes macOS.

@@ -12,9 +12,6 @@ import 'package:intl/intl.dart';
 
 import 'utils.dart';
 
-/// A basic digital clock.
-///
-/// You can do better than this!
 class DigitalClock extends StatefulWidget {
   const DigitalClock(this.model);
 
@@ -311,7 +308,7 @@ class TimeWidget extends StatelessWidget {
     for (var i = 0; i < 4; i++) {
       paintedTexts.add(
         Observer(
-          builder: (context) {
+          builder: (_) {
             String str = '0';
             switch (i) {
               case 0:
@@ -328,7 +325,6 @@ class TimeWidget extends StatelessWidget {
                 break;
               default:
             }
-
             return Padding(
               padding: EdgeInsets.only(
                 left: calcWidth / 16.44,
@@ -379,28 +375,30 @@ class TempWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(calcWidth / 34.25),
-      child: Observer(builder: (context) {
-        int sec = int.parse(clock.seconds);
-        String temp = '';
-        if (sec > 40) {
-          temp = 'High : ' + widget.model.highString;
-        } else if (sec > 20) {
-          temp = ' Low : ' + widget.model.lowString;
-        } else {
-          var cond = widget.model.weatherCondition
-              .toString()
-              .replaceAll('WeatherCondition.', '');
-          temp = '${cond[0].toUpperCase() + cond.substring(1)} ' +
-              '(${widget.model.temperatureString})';
-        }
-        return Text(
-          temp,
-          style: TextStyle(
-            fontSize: calcWidth / 29.36,
-            color: colors[ClockTheme.textTemp],
-          ),
-        );
-      }),
+      child: Observer(
+        builder: (_) {
+          int sec = int.parse(clock.seconds);
+          String temp = '';
+          if (sec > 40) {
+            temp = 'High : ' + widget.model.highString;
+          } else if (sec > 20) {
+            temp = ' Low : ' + widget.model.lowString;
+          } else {
+            var cond = widget.model.weatherCondition
+                .toString()
+                .replaceAll('WeatherCondition.', '');
+            temp = '${cond[0].toUpperCase() + cond.substring(1)} ' +
+                '(${widget.model.temperatureString})';
+          }
+          return Text(
+            temp,
+            style: TextStyle(
+              fontSize: calcWidth / 29.36,
+              color: colors[ClockTheme.textTemp],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -415,22 +413,20 @@ class DateandDayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).brightness == Brightness.light
+        ? lightTheme
+        : darkTheme;
     return Observer(
-      builder: (context) {
-        final weekday = clock.weekday;
-        final day = clock.day;
-        final month = months[clock.month - 1];
-        return Padding(
-          padding: EdgeInsets.all(calcWidth / 34.25),
-          child: Text(
-            '$weekday, $day $month',
-            style: TextStyle(
-              fontSize: calcWidth / 29.36,
-              color: Color(0xFFFFFFFF),
-            ),
+      builder: (_) => Padding(
+        padding: EdgeInsets.all(calcWidth / 34.25),
+        child: Text(
+          '${clock.weekday}, ${clock.day} ${months[clock.month - 1]}',
+          style: TextStyle(
+            fontSize: calcWidth / 29.36,
+            color: colors[ClockTheme.text],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
