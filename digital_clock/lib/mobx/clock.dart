@@ -33,7 +33,7 @@ abstract class _Clock with Store {
   }
 
   @observable
-  int day = 0;
+  int day = 1;
 
   @action
   void setday(int dayL) {
@@ -41,7 +41,7 @@ abstract class _Clock with Store {
   }
 
   @observable
-  int month = 0;
+  int month = 1;
 
   @action
   void setmonth(int monthL) {
@@ -62,6 +62,14 @@ abstract class _Clock with Store {
   @action
   void setwish(String wishL) {
     wish = wishL;
+  }
+
+  @observable
+  String oldwish = '';
+
+  @action
+  void setOldwish(String wishL) {
+    oldwish = wishL;
   }
 
   @observable

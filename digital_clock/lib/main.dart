@@ -14,6 +14,7 @@ import 'digital_clock.dart';
 void main() {
   // A temporary measure until Platform supports web and TargetPlatform supports
   // macOS.
+  //TODO ? Add OpenSource License for Submission.
   //TODO ? Make Animation on Time Change.
   if (!kIsWeb && Platform.isMacOS) {
     // TODO(gspencergoog): Update this when TargetPlatform includes macOS.

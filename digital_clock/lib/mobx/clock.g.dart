@@ -128,6 +128,23 @@ mixin _$Clock on _Clock, Store {
     }, _$wishAtom, name: '${_$wishAtom.name}_set');
   }
 
+  final _$oldwishAtom = Atom(name: '_Clock.oldwish');
+
+  @override
+  String get oldwish {
+    _$oldwishAtom.context.enforceReadPolicy(_$oldwishAtom);
+    _$oldwishAtom.reportObserved();
+    return super.oldwish;
+  }
+
+  @override
+  set oldwish(String value) {
+    _$oldwishAtom.context.conditionallyRunInAction(() {
+      super.oldwish = value;
+      _$oldwishAtom.reportChanged();
+    }, _$oldwishAtom, name: '${_$oldwishAtom.name}_set');
+  }
+
   final _$weekdayAtom = Atom(name: '_Clock.weekday');
 
   @override
@@ -212,6 +229,16 @@ mixin _$Clock on _Clock, Store {
     final _$actionInfo = _$_ClockActionController.startAction();
     try {
       return super.setwish(wishL);
+    } finally {
+      _$_ClockActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setOldwish(String wishL) {
+    final _$actionInfo = _$_ClockActionController.startAction();
+    try {
+      return super.setOldwish(wishL);
     } finally {
       _$_ClockActionController.endAction(_$actionInfo);
     }

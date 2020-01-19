@@ -54,17 +54,26 @@ class _DigitalClockState extends State<DigitalClock> {
 
   void _updateModel() => (mounted) ? setState(() {}) : null;
 
-  bool _lightYearMode = false;
   void _updateTime() {
-    var _dateTime = !_lightYearMode
-        ? DateTime.now()
-        : DateTime.fromMillisecondsSinceEpoch(
-            (DateTime.now().millisecondsSinceEpoch * 8000).toInt());
-    ;
-    String hour =
-        DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
+    bool _speedMode = true;
+    var _dateTime = DateTime.now();
+    String hour = DateFormat(
+      widget.model.is24HourFormat ? 'HH' : 'hh',
+    ).format(_dateTime);
     String minute = DateFormat('mm').format(_dateTime);
     String second = DateFormat('ss').format(_dateTime);
+    if (_speedMode) {
+      if (_dateTime.minute > 23) {
+        int i = (_dateTime.minute < 44)
+            ? (43 - _dateTime.minute)
+            : (60 - _dateTime.minute);
+        hour = '$i';
+      } else {
+        hour = minute;
+      }
+      if (hour.length < 2) hour = '0$hour';
+      minute = second;
+    }
     clock.setSeconds(second);
     clock.setMinutes(minute);
     clock.setHours(hour);
@@ -129,8 +138,11 @@ class _DigitalClockState extends State<DigitalClock> {
                 SecondsTicker(
                   calcWidth: calcWidth,
                 ),
-                WishWidget(
-                  calcWidth: calcWidth,
+                Observer(
+                  builder: (_) => WishWidget(
+                    wish: clock.wish,
+                    calcWidth: calcWidth,
+                  ),
                 ),
               ],
             ),
@@ -300,7 +312,7 @@ class TimeWidget extends StatelessWidget {
       paintedTexts.add(
         Observer(
           builder: (context) {
-            String str = '00';
+            String str = '0';
             switch (i) {
               case 0:
                 str = clock.hours.substring(0, 1);
@@ -323,18 +335,12 @@ class TimeWidget extends StatelessWidget {
                 right: calcWidth / 8.22,
                 top: calcWidth / 10.275,
               ),
-              child:
-                  // AnimatedContainer(
-                  //   duration: Duration(seconds: 2),
-                  //   curve: Curves.bounceInOut,
-                  //   child:
-                  CustomPaint(
+              child: CustomPaint(
                 painter: TextPainterC(
                   str,
                   defaultStyle,
                 ),
               ),
-              // ),
             );
           },
         ),
@@ -381,7 +387,11 @@ class TempWidget extends StatelessWidget {
         } else if (sec > 20) {
           temp = ' Low : ' + widget.model.lowString;
         } else {
-          temp = 'Avg : ' + widget.model.temperatureString;
+          var cond = widget.model.weatherCondition
+              .toString()
+              .replaceAll('WeatherCondition.', '');
+          temp = '${cond[0].toUpperCase() + cond.substring(1)} ' +
+              '(${widget.model.temperatureString})';
         }
         return Text(
           temp,
@@ -429,9 +439,11 @@ class WishWidget extends StatelessWidget {
   const WishWidget({
     Key key,
     @required this.calcWidth,
+    @required this.wish,
   }) : super(key: key);
 
   final double calcWidth;
+  final String wish;
 
   @override
   Widget build(BuildContext context) {
@@ -447,15 +459,13 @@ class WishWidget extends StatelessWidget {
         right: 16.0,
       ),
       margin: EdgeInsets.only(bottom: 16.0),
-      child: Observer(builder: (context) {
-        return Text(
-          clock.wish,
-          style: TextStyle(
-            fontSize: calcWidth / 34.25,
-            color: Color(0xFF286788),
-          ),
-        );
-      }),
+      child: Text(
+        wish,
+        style: TextStyle(
+          fontSize: calcWidth / 34.25,
+          color: Color(0xFF286788),
+        ),
+      ),
     );
   }
 }
