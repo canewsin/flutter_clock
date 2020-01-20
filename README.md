@@ -12,4 +12,4 @@ Example [Analog Clock](analog_clock)
 
 Example [Digital Clock](digital_clock)
 
-<img src='digital_clock/digital.gif' width='350'>
+<img src='digital_clock/digital_light.png' width='350'>
